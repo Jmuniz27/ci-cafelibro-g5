@@ -7,7 +7,7 @@ def loan_book(book_code: str, member_id: str, loan_date: str, due_date: str) -> 
     start = date.fromisoformat(loan_date)
     end = date.fromisoformat(due_date)
 
-    if end > start:
+    if end <= start:
         raise ValueError("due_date must be after loan_date")
 
     if not any(book["code"] == book_code for book in data["books"]):
