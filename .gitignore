@@ -20,9 +20,6 @@ env/
 .coverage
 htmlcov/
 
-# Data file
-data.json
-
 # IDEs
 .vscode/
 .idea/
