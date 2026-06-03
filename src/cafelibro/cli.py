@@ -2,6 +2,7 @@ import argparse
 from cafelibro.books import register_book
 from cafelibro.members import register_member
 from cafelibro.queries import list_member_loans
+from cafelibro.returns import return_book
 
 
 def main():
@@ -19,6 +20,9 @@ def main():
     list_loans = subparsers.add_parser("list-loans", help="List active loans for a member")
     list_loans.add_argument("--member", required=True, help="Member id")
 
+    return_book_parser = subparsers.add_parser("return", help="Return a borrowed book")
+    return_book_parser.add_argument("--book", required=True, help="Book code to return")
+
     args = parser.parse_args()
 
     if args.command == "add-book":
@@ -35,6 +39,13 @@ def main():
         except ValueError as e:
             print(f"Error: {e}")
             raise SystemExit(1)
+    elif args.command == "return":
+        try:
+            loan = return_book(args.book)
+            print(loan)
+        except ValueError as e:
+            print(f"Error: {e}")
+            raise SystemExit(1)
     elif args.command == "list-loans":
         try:
             loans = list_member_loans(args.member)
@@ -45,3 +56,10 @@ def main():
             print(f"El miembro {args.member} no tiene libros prestados")
         for loan in loans:
             print(f"- {loan['book_code']} {loan['title']} (vence {loan['due_date']})")
+    elif args.command == "add-member":
+        try:
+            member = register_member(args.id, args.name)
+            print(member)
+        except ValueError as e:
+            print(f"Error: {e}")
+            raise SystemExit(1)
