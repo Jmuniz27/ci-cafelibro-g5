@@ -2,12 +2,11 @@ import json
 from pathlib import Path
 
 DATA_FILE = Path("data.json")
-EMPTY_DATA = {"books": {}, "members": {}, "loans": {}}
 
 
 def load_data() -> dict:
     if not DATA_FILE.exists():
-        return {"books": {}, "members": {}, "loans": {}}
+        return {"books": [], "members": [], "loans": []}
     with DATA_FILE.open("r", encoding="utf-8") as f:
         return json.load(f)
 
