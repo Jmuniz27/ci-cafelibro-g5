@@ -1,6 +1,6 @@
 import argparse
 from cafelibro.books import register_book
-from cafelibro.queries import list_member_loans          # <-- NUEVO
+from cafelibro.queries import list_member_loans          
 
 
 def main():
