@@ -1,5 +1,6 @@
 import argparse
 from cafelibro.books import register_book
+from cafelibro.queries import list_member_loans          
 
 
 def main():
@@ -19,3 +20,14 @@ def main():
         except ValueError as e:
             print(f"Error: {e}")
             raise SystemExit(1)
+    
+    elif args.command == "list-loans":                    
+        try:
+            loans = list_member_loans(args.member)
+        except ValueError as e:
+            print(f"Error: {e}")
+            raise SystemExit(1)
+        if not loans:
+            print(f"El miembro {args.member} no tiene libros prestados")
+        for loan in loans:
+            print(f"- {loan['book_code']} {loan['title']} (vence {loan['due_date']})")
