@@ -1,31 +1,32 @@
 import argparse
-import sys
-
+from cafelibro.books import register_book
 from cafelibro.returns import return_book
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cafelibro", description="CaféLibro CLI")
+def main():
+    parser = argparse.ArgumentParser(prog="cafelibro")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    return_parser = subparsers.add_parser("return", help="Return a borrowed book")
-    return_parser.add_argument("--book", required=True, help="Book code to return")
+    add_book = subparsers.add_parser("add-book", help="Register a book in the catalogue")
+    add_book.add_argument("--code", required=True, help="Unique book code")
+    add_book.add_argument("--title", required=True, help="Book title")
 
-    return parser
+    return_book_parser = subparsers.add_parser("return", help="Return a borrowed book")
+    return_book_parser.add_argument("--book", required=True, help="Book code to return")
 
+    args = parser.parse_args()
 
-def main(argv: list[str] | None = None) -> None:
-    parser = build_parser()
-    args = parser.parse_args(argv)
-
-    if args.command == "return":
+    if args.command == "add-book":
+        try:
+            book = register_book(args.code, args.title)
+            print(book)
+        except ValueError as e:
+            print(f"Error: {e}")
+            raise SystemExit(1)
+    elif args.command == "return":
         try:
             loan = return_book(args.book)
-        except ValueError as exc:
-            print(f"Error: {exc}", file=sys.stderr)
+            print(loan)
+        except ValueError as e:
+            print(f"Error: {e}")
             raise SystemExit(1)
-        print(loan)
-
-
-if __name__ == "__main__":
-    main()
