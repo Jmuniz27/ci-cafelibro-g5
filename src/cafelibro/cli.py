@@ -1,8 +1,12 @@
 import argparse
+from datetime import date
+
 from cafelibro.books import register_book
+from cafelibro.loan_book import loan_book
 from cafelibro.members import register_member
 from cafelibro.queries import list_member_loans
 from cafelibro.returns import return_book
+from main import overdue_command
 
 
 def main():
@@ -17,11 +21,19 @@ def main():
     add_member.add_argument("--id", required=True, help="Unique member id")
     add_member.add_argument("--name", required=True, help="Member name")
 
+    loan_parser = subparsers.add_parser("loan", help="Loan a book to a member")
+    loan_parser.add_argument("--book", required=True, help="Book code")
+    loan_parser.add_argument("--member", required=True, help="Member id")
+    loan_parser.add_argument("--due-date", required=True, help="Due date (YYYY-MM-DD)")
+
     list_loans = subparsers.add_parser("list-loans", help="List active loans for a member")
     list_loans.add_argument("--member", required=True, help="Member id")
 
-    return_book_parser = subparsers.add_parser("return", help="Return a borrowed book")
-    return_book_parser.add_argument("--book", required=True, help="Book code to return")
+    return_parser = subparsers.add_parser("return", help="Return a borrowed book")
+    return_parser.add_argument("--book", required=True, help="Book code to return")
+
+    overdue_parser = subparsers.add_parser("overdue", help="Report overdue loans")
+    overdue_parser.add_argument("--today", required=True, help="Today's date (YYYY-MM-DD)")
 
     args = parser.parse_args()
 
@@ -32,6 +44,7 @@ def main():
         except ValueError as e:
             print(f"Error: {e}")
             raise SystemExit(1)
+
     elif args.command == "add-member":
         try:
             member = register_member(args.id, args.name)
@@ -39,13 +52,15 @@ def main():
         except ValueError as e:
             print(f"Error: {e}")
             raise SystemExit(1)
-    elif args.command == "return":
+
+    elif args.command == "loan":
         try:
-            loan = return_book(args.book)
-            print(loan)
-        except ValueError as e:
+            loan_book(args.book, args.member, date.today().isoformat(), args.due_date)
+            print(f"Book {args.book} loaned to {args.member}, due {args.due_date}.")
+        except (ValueError, LookupError) as e:
             print(f"Error: {e}")
             raise SystemExit(1)
+
     elif args.command == "list-loans":
         try:
             loans = list_member_loans(args.member)
@@ -56,10 +71,23 @@ def main():
             print(f"El miembro {args.member} no tiene libros prestados")
         for loan in loans:
             print(f"- {loan['book_code']} {loan['title']} (vence {loan['due_date']})")
-    elif args.command == "add-member":
+
+    elif args.command == "return":
         try:
-            member = register_member(args.id, args.name)
-            print(member)
+            loan = return_book(args.book)
+            print(loan)
         except ValueError as e:
             print(f"Error: {e}")
             raise SystemExit(1)
+
+    elif args.command == "overdue":
+        try:
+            today = date.fromisoformat(args.today)
+        except ValueError:
+            print(f"Error: invalid date '{args.today}', expected YYYY-MM-DD.")
+            raise SystemExit(1)
+        overdue_command(today)
+
+
+if __name__ == "__main__":
+    main()
